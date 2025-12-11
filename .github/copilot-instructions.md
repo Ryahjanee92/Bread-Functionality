@@ -33,6 +33,11 @@ Development & Run Commands
 - Run only e2e tests: `pytest -m e2e`.
 - Docker compose: `docker-compose up --build` starts Postgres, pgadmin and the app.
 
+Auto-commit / Sync
+- The repository includes a small watcher script to auto-stage, commit and push changes during local development: `scripts/autocommit.py`.
+- Run it with `python3 scripts/autocommit.py --interval 2` or use `scripts/run_autocommit.sh` to background it.
+- It's a convenience tool and not intended for CI or production; review the script before enabling in a shared environment.
+
 Notes for AI Agents (Do's)
 - When adding API endpoints, follow the patterns in `app/main.py`: use `Depends(get_db)` for DB sessions and `get_current_active_user` for auth.
 - When editing models, ensure you add migrations or `Base.metadata.create_all()` usage in `app/database_init.py` if needed for testing.
