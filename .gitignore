@@ -1,3 +1,13 @@
+# Environment
+venv/
+env/
+__pycache__/
+.pytest_cache/
+*.pyc
+.autocommit.pid
+
+# Local env
+.env
 venv/
 __pycache__/
 *.pyc
