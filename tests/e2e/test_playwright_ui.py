@@ -124,6 +124,13 @@ def test_ui_invalid_input_and_unauthorized_access(page, fastapi_server: str):
     page.wait_for_selector('#errorAlert', timeout=5000)
     assert page.locator('#errorMessage', has_text='at least two').count() > 0
 
+    # Negative case: Division by zero on creation (client-side validation)
+    page.fill('#calcInputs', '10, 0')
+    page.select_option('#calcType', 'division')
+    page.click('#calculationForm button[type="submit"]')
+    page.wait_for_selector('#errorAlert', timeout=5000)
+    assert page.locator('#errorMessage', has_text='Division by zero').count() > 0
+
     # Negative case: Clear tokens and navigate to dashboard, should redirect to login
     page.evaluate("localStorage.clear()")
     page.goto(f"{base_url}/dashboard")
@@ -131,4 +138,11 @@ def test_ui_invalid_input_and_unauthorized_access(page, fastapi_server: str):
 
     # Negative case: Attempt an API call without token (via browser fetch)
     res = page.evaluate("async (baseUrl) => { const r = await fetch(baseUrl + '/calculations'); return { status: r.status, text: await r.text() }; }", base_url)
-    assert res['status'] in (200, 401), f"Unexpected status code for unauthenticated fetch: {res['status']}, body: {res['text']}"
+    assert res['status'] == 401, f"Expected 401 for unauthenticated fetch, got {res['status']}\nBody: {res['text']}"
+
+    # Negative case: Invalid operation type should return 400 when called via API
+    invalid_post = page.evaluate(
+        "async (baseUrl) => { const r = await fetch(baseUrl + '/calculations', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type: 'invalid', inputs: [1,2] }) }); return { status: r.status, text: await r.text() }; }",
+        base_url
+    )
+    assert invalid_post['status'] == 400, f"Expected 400 for invalid calc type, got {invalid_post['status']}\nBody: {invalid_post['text']}"
