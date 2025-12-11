@@ -425,6 +425,17 @@ document.addEventListener('DOMContentLoaded', function() {
       return;
     }
 
+    // Validate division by zero on client-side
+    const selectedType = document.getElementById('calcType').value;
+    if (selectedType === 'division' && inputs.some((value, index) => index > 0 && value === 0)) {
+      showError('Division by zero is not allowed.');
+      const inputField = document.getElementById('calcInputs');
+      inputField.classList.add('border-red-500');
+      inputField.focus();
+      setTimeout(() => inputField.classList.remove('border-red-500'), 3000);
+      return;
+    }
+
     const newCalc = {
       type: document.getElementById('calcType').value,
       inputs
